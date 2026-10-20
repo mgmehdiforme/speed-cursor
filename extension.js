@@ -2,7 +2,6 @@ import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
-import Meta from 'gi://Meta';
 import St from 'gi://St';
 
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
@@ -21,38 +20,8 @@ const FRAME_INTERVAL_MS = 16; // ~60 FPS
 const STOP_TIMEOUT_US = 65000; // 65ms without movement counts as stopped
 const VALID_THEMES = ['ember', 'solar', 'plasma', 'emerald', 'crimson'];
 
-/**
- * Safely retrieve the Meta.CursorTracker instance across GNOME Shell 45–50+.
- *
- * @returns {Meta.CursorTracker | null}
- */
-function getCursorTracker() {
-    if (typeof global.backend?.get_cursor_tracker === 'function')
-        return global.backend.get_cursor_tracker();
-    if (typeof Meta.CursorTracker?.get_for_display === 'function')
-        return Meta.CursorTracker.get_for_display(global.display);
-    return null;
-}
-
-/**
- * Safely retrieve the default Clutter.Seat across GNOME Shell 45–50+.
- *
- * @returns {Clutter.Seat | null}
- */
-function getDefaultSeat() {
-    if (typeof Clutter.get_default_backend === 'function') {
-        const backend = Clutter.get_default_backend();
-        if (typeof backend?.get_default_seat === 'function')
-            return backend.get_default_seat();
-    }
-    return global.stage?.context?.get_backend?.()?.get_default_seat?.() ?? null;
-}
-
-const _TYPE_SUFFIX = `${GLib.get_monotonic_time()}`;
-
-const SpeedCursorQuickToggle = GObject.registerClass({
-    GTypeName: `SpeedCursorQuickToggle_${_TYPE_SUFFIX}`,
-}, class SpeedCursorQuickToggle extends QuickSettings.QuickMenuToggle {
+const SpeedCursorQuickToggle = GObject.registerClass(
+class SpeedCursorQuickToggle extends QuickSettings.QuickMenuToggle {
     _init(settings, openPrefsCallback) {
         super._init({
             title: 'Speed Cursor',
@@ -85,7 +54,7 @@ const SpeedCursorQuickToggle = GObject.registerClass({
             this._settings.get_boolean('effect-enabled')
         );
         this._scaleSwitch.connect('toggled', (_item, state) => {
-            this._settings?.set_boolean('effect-enabled', state);
+            this._settings.set_boolean('effect-enabled', state);
         });
         featuresSection.addMenuItem(this._scaleSwitch);
 
@@ -94,7 +63,7 @@ const SpeedCursorQuickToggle = GObject.registerClass({
             this._settings.get_boolean('fire-breathing-enabled')
         );
         this._haloSwitch.connect('toggled', (_item, state) => {
-            this._settings?.set_boolean('fire-breathing-enabled', state);
+            this._settings.set_boolean('fire-breathing-enabled', state);
         });
         featuresSection.addMenuItem(this._haloSwitch);
 
@@ -103,7 +72,7 @@ const SpeedCursorQuickToggle = GObject.registerClass({
             this._settings.get_boolean('comet-fire-enabled')
         );
         this._cometSwitch.connect('toggled', (_item, state) => {
-            this._settings?.set_boolean('comet-fire-enabled', state);
+            this._settings.set_boolean('comet-fire-enabled', state);
         });
         featuresSection.addMenuItem(this._cometSwitch);
 
@@ -133,8 +102,8 @@ const SpeedCursorQuickToggle = GObject.registerClass({
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         const prefsItem = this.menu.addAction('Speed Cursor Settings…', () => {
-            Main.panel.statusArea.quickSettings?.menu?.close();
-            this._openPrefsCallback?.();
+            Main.panel.statusArea.quickSettings.menu.close();
+            this._openPrefsCallback();
         });
         prefsItem.visible = Main.sessionMode.allowSettings;
 
@@ -145,8 +114,6 @@ const SpeedCursorQuickToggle = GObject.registerClass({
     }
 
     _isAnyFeatureEnabled() {
-        if (!this._settings)
-            return false;
         return (
             this._settings.get_boolean('effect-enabled') ||
             this._settings.get_boolean('fire-breathing-enabled') ||
@@ -155,18 +122,15 @@ const SpeedCursorQuickToggle = GObject.registerClass({
     }
 
     _syncState() {
-        if (!this._settings)
-            return;
-
         const scaleOn = this._settings.get_boolean('effect-enabled');
         const haloOn = this._settings.get_boolean('fire-breathing-enabled');
         const cometOn = this._settings.get_boolean('comet-fire-enabled');
         const maxScale = this._settings.get_double('max-fast-scale');
 
         this.checked = scaleOn || haloOn || cometOn;
-        this._scaleSwitch?.setToggleState(scaleOn);
-        this._haloSwitch?.setToggleState(haloOn);
-        this._cometSwitch?.setToggleState(cometOn);
+        this._scaleSwitch.setToggleState(scaleOn);
+        this._haloSwitch.setToggleState(haloOn);
+        this._cometSwitch.setToggleState(cometOn);
 
         const activeParts = [];
         if (scaleOn)
@@ -178,15 +142,13 @@ const SpeedCursorQuickToggle = GObject.registerClass({
 
         this.subtitle = activeParts.length > 0 ? activeParts.join(' • ') : 'Off';
 
-        if (this._presetItems) {
-            for (const p of this._presetItems) {
-                const isMatch = scaleOn && Math.abs(maxScale - p.max) < 0.15;
-                p.item.setOrnament(
-                    isMatch
-                        ? PopupMenu.Ornament.CHECK
-                        : PopupMenu.Ornament.NONE
-                );
-            }
+        for (const p of this._presetItems) {
+            const isMatch = scaleOn && Math.abs(maxScale - p.max) < 0.15;
+            p.item.setOrnament(
+                isMatch
+                    ? PopupMenu.Ornament.CHECK
+                    : PopupMenu.Ornament.NONE
+            );
         }
     }
 
@@ -205,9 +167,8 @@ const SpeedCursorQuickToggle = GObject.registerClass({
     }
 });
 
-const SpeedCursorIndicator = GObject.registerClass({
-    GTypeName: `SpeedCursorIndicator_${_TYPE_SUFFIX}`,
-}, class SpeedCursorIndicator extends QuickSettings.SystemIndicator {
+const SpeedCursorIndicator = GObject.registerClass(
+class SpeedCursorIndicator extends QuickSettings.SystemIndicator {
     _init(settings, openPrefsCallback) {
         super._init();
         this._toggle = new SpeedCursorQuickToggle(settings, openPrefsCallback);
@@ -229,8 +190,8 @@ export default class SpeedCursorExtension extends Extension {
             schema_id: 'org.gnome.desktop.interface',
         });
 
-        this._cursorTracker = getCursorTracker();
-        this._seat = getDefaultSeat();
+        this._cursorTracker = global.backend.get_cursor_tracker();
+        this._seat = Clutter.get_default_backend().get_default_seat();
 
         this._cursorUnfocusInhibited = false;
         this._cursorVisibleInhibited = false;
@@ -240,7 +201,7 @@ export default class SpeedCursorExtension extends Extension {
             'changed::cursor-size',
             () => {
                 this._baseCursorSize =
-                    this._interfaceSettings?.get_int('cursor-size') || 24;
+                    this._interfaceSettings.get_int('cursor-size') || 24;
             }
         );
 
@@ -271,13 +232,11 @@ export default class SpeedCursorExtension extends Extension {
             this._onPointerMoved.bind(this)
         );
 
-        if (Main.panel?.statusArea?.quickSettings) {
-            this._indicator = new SpeedCursorIndicator(
-                this._settings,
-                () => this.openPreferences()
-            );
-            Main.panel.statusArea.quickSettings.addExternalIndicator(this._indicator);
-        }
+        this._indicator = new SpeedCursorIndicator(
+            this._settings,
+            () => this.openPreferences()
+        );
+        Main.panel.statusArea.quickSettings.addExternalIndicator(this._indicator);
 
         if (this._fireBreathingEnabled && this._fireBreathingAlways)
             this._startAnimationLoop();
@@ -370,21 +329,14 @@ export default class SpeedCursorExtension extends Extension {
         const haloGicon = this._getThemeGIcon('halo', theme);
         const cometGicon = this._getThemeGIcon('comet', theme);
 
-        if (this._haloOuter)
-            this._haloOuter.gicon = haloGicon;
-        if (this._haloCore)
-            this._haloCore.gicon = haloGicon;
+        this._haloOuter.gicon = haloGicon;
+        this._haloCore.gicon = haloGicon;
 
-        if (this._cometPool) {
-            for (const node of this._cometPool)
-                node.actor.gicon = cometGicon;
-        }
+        for (const node of this._cometPool)
+            node.actor.gicon = cometGicon;
     }
 
     _loadConfig() {
-        if (!this._settings)
-            return;
-
         this._effectEnabled = this._settings.get_boolean('effect-enabled');
         this._minMoveScale = Math.max(1.0, this._settings.get_double('min-move-scale'));
         this._maxFastScale = Math.max(
@@ -430,20 +382,20 @@ export default class SpeedCursorExtension extends Extension {
         if (!this._hideSystemCursorPref && this._cursorVisibleInhibited)
             this._showSystemCursor();
 
-        if (!this._effectEnabled && this._actor) {
+        if (!this._effectEnabled) {
             this._actor.hide();
             this._showSystemCursor();
         }
 
         if (!this._fireBreathingEnabled) {
-            this._haloOuter?.hide();
-            this._haloCore?.hide();
+            this._haloOuter.hide();
+            this._haloCore.hide();
             this._haloFade = 0.0;
         } else if (this._fireBreathingAlways && !this._animLoopId) {
             this._startAnimationLoop();
         }
 
-        if (!this._cometFireEnabled && this._cometPool) {
+        if (!this._cometFireEnabled) {
             for (const node of this._cometPool) {
                 node.active = false;
                 node.actor.hide();
@@ -459,24 +411,14 @@ export default class SpeedCursorExtension extends Extension {
         this._currentScale = 1.0;
         this._smoothSpeed = 0.0;
         this._haloFade = 0.0;
-        this._actor?.hide();
-        this._haloOuter?.hide();
-        this._haloCore?.hide();
-        if (this._cometPool) {
-            for (const node of this._cometPool) {
-                node.active = false;
-                node.actor.hide();
-            }
+        this._actor.hide();
+        this._haloOuter.hide();
+        this._haloCore.hide();
+        for (const node of this._cometPool) {
+            node.active = false;
+            node.actor.hide();
         }
         this._showSystemCursor();
-    }
-
-    _isPointerVisibleBySystem() {
-        if (!this._cursorTracker)
-            return true;
-        if (typeof this._cursorTracker.get_pointer_visible === 'function')
-            return this._cursorTracker.get_pointer_visible();
-        return true;
     }
 
     _spawnCometSegment(x0, y0, x1, y1, instantSpeed) {
@@ -502,7 +444,6 @@ export default class SpeedCursorExtension extends Extension {
             node.active = true;
             node.x = px;
             node.y = py;
-            // Subtle backward drift + upward thermal buoyancy (rising flame effect)
             node.vx = (-dx / dist) * 18 + (Math.random() - 0.5) * 22;
             node.vy = (-dy / dist) * 18 - 28 - Math.random() * 20;
             node.age = 0.0;
@@ -513,11 +454,11 @@ export default class SpeedCursorExtension extends Extension {
     }
 
     _raiseActorsToTop() {
-        if (this._haloOuter?.visible)
+        if (this._haloOuter.visible)
             Main.uiGroup.set_child_above_sibling(this._haloOuter, null);
-        if (this._haloCore?.visible)
+        if (this._haloCore.visible)
             Main.uiGroup.set_child_above_sibling(this._haloCore, null);
-        if (this._actor?.visible)
+        if (this._actor.visible)
             Main.uiGroup.set_child_above_sibling(this._actor, null);
     }
 
@@ -536,17 +477,16 @@ export default class SpeedCursorExtension extends Extension {
         this._lastMoveTimeUs = nowUs;
 
         // If another application intentionally hid the cursor (e.g. video player / game), skip
-        if (!this._cursorVisibleInhibited && !this._isPointerVisibleBySystem())
+        if (!this._cursorVisibleInhibited && !this._cursorTracker.get_pointer_visible())
             return;
 
-        // Calculate instantaneous speed (px/sec) and blend into smoothed velocity
         const instantSpeed = Math.min(dist / dtSec, this._maxSpeedThreshold * 2.0);
         if (instantSpeed > this._smoothSpeed)
             this._smoothSpeed = this._smoothSpeed * 0.55 + instantSpeed * 0.45;
         else
             this._smoothSpeed = this._smoothSpeed * 0.78 + instantSpeed * 0.22;
 
-        if (this._effectEnabled && this._actor)
+        if (this._effectEnabled)
             this._actor.set_position(x - this._hotOffsetX, y - this._hotOffsetY);
 
         if (this._cometFireEnabled)
@@ -575,10 +515,10 @@ export default class SpeedCursorExtension extends Extension {
         this._lastFrameTimeUs = nowUs;
 
         // If another app hid the system pointer (fullscreen video/game), pause visuals
-        if (!this._cursorVisibleInhibited && !this._isPointerVisibleBySystem()) {
-            this._actor?.hide();
-            this._haloOuter?.hide();
-            this._haloCore?.hide();
+        if (!this._cursorVisibleInhibited && !this._cursorTracker.get_pointer_visible()) {
+            this._actor.hide();
+            this._haloOuter.hide();
+            this._haloCore.hide();
             return GLib.SOURCE_CONTINUE;
         }
 
@@ -596,7 +536,7 @@ export default class SpeedCursorExtension extends Extension {
 
         // 1. Update Comet-Fire trail particles
         let activeCometCount = 0;
-        if (this._cometFireEnabled && this._cometPool) {
+        if (this._cometFireEnabled) {
             for (let i = 0; i < this._cometPool.length; i++) {
                 const node = this._cometPool[i];
                 if (!node.active)
@@ -613,7 +553,6 @@ export default class SpeedCursorExtension extends Extension {
                 const progress = node.age / node.maxAge;
                 const life = 1.0 - progress;
 
-                // Organic flame turbulence + upward drift
                 const flicker = Math.sin(node.age * 22.0 + node.phase) * 14.0 * dt;
                 node.x += node.vx * dt + flicker;
                 node.y += node.vy * dt;
@@ -630,7 +569,7 @@ export default class SpeedCursorExtension extends Extension {
 
         // 2. Update Fire-Breathing Halo around pointer
         let haloActive = false;
-        if (this._fireBreathingEnabled && this._haloOuter && this._haloCore) {
+        if (this._fireBreathingEnabled) {
             const wantHalo = this._fireBreathingAlways || isMoving || this._smoothSpeed > 10.0;
             if (wantHalo)
                 this._haloFade = Math.min(1.0, this._haloFade + dt * 6.0);
@@ -645,16 +584,13 @@ export default class SpeedCursorExtension extends Extension {
                     this._raiseActorsToTop();
                 }
 
-                // Advance breathing phase (faster when stoked by mouse movement)
                 const stokedFreq = this._fireBreathingSpeed * (1.0 + 0.85 * speedNorm);
                 this._breathPhase = (this._breathPhase + dt * stokedFreq * Math.PI * 2.0) % (Math.PI * 200);
 
-                // Dual-harmonic wave for natural "fire-breathing" expansion & flicker
                 const primaryWave = 0.5 + 0.5 * Math.sin(this._breathPhase);
                 const harmonicFlicker = 0.5 + 0.5 * Math.sin(this._breathPhase * 2.7 + 1.1);
                 const breathFactor = 0.72 * primaryWave + 0.28 * harmonicFlicker;
 
-                // Halo expands with breathing pulse AND stokes larger when moving fast
                 const outerDiameter =
                     this._fireBreathingSize *
                     (0.82 + 0.34 * breathFactor + 0.42 * speedNorm);
@@ -684,7 +620,7 @@ export default class SpeedCursorExtension extends Extension {
 
         // 3. Update Speed-Scaled Cursor Arrow
         let cursorScalingActive = false;
-        if (this._effectEnabled && this._actor) {
+        if (this._effectEnabled) {
             let targetScale = 1.0;
             if (isMoving) {
                 const curvedSpeed = Math.pow(speedNorm, 0.75);
@@ -731,48 +667,25 @@ export default class SpeedCursorExtension extends Extension {
     }
 
     _hideSystemCursor() {
-        try {
-            if (!this._cursorUnfocusInhibited && typeof this._seat?.inhibit_unfocus === 'function') {
-                this._seat.inhibit_unfocus();
-                this._cursorUnfocusInhibited = true;
-            }
+        if (!this._cursorUnfocusInhibited) {
+            this._seat.inhibit_unfocus();
+            this._cursorUnfocusInhibited = true;
+        }
 
-            if (!this._cursorVisibleInhibited && this._cursorTracker) {
-                if (typeof this._cursorTracker.inhibit_cursor_visibility === 'function') {
-                    this._cursorTracker.inhibit_cursor_visibility();
-                    this._cursorVisibleInhibited = true;
-                } else if (typeof this._cursorTracker.set_pointer_visible === 'function') {
-                    this._cursorTracker.set_pointer_visible(false);
-                    this._cursorVisibleInhibited = true;
-                }
-            }
-        } catch (e) {
-            console.warn(`[speed-cursor] Failed to hide system cursor: ${e.message}`);
+        if (!this._cursorVisibleInhibited) {
+            this._cursorTracker.inhibit_cursor_visibility();
+            this._cursorVisibleInhibited = true;
         }
     }
 
     _showSystemCursor() {
-        try {
-            if (this._cursorUnfocusInhibited && typeof this._seat?.uninhibit_unfocus === 'function') {
-                this._seat.uninhibit_unfocus();
-                this._cursorUnfocusInhibited = false;
-            }
-        } catch (e) {
-            console.warn(`[speed-cursor] Failed to uninhibit seat unfocus: ${e.message}`);
+        if (this._cursorUnfocusInhibited) {
+            this._seat.uninhibit_unfocus();
             this._cursorUnfocusInhibited = false;
         }
 
-        try {
-            if (this._cursorVisibleInhibited && this._cursorTracker) {
-                if (typeof this._cursorTracker.uninhibit_cursor_visibility === 'function') {
-                    this._cursorTracker.uninhibit_cursor_visibility();
-                } else if (typeof this._cursorTracker.set_pointer_visible === 'function') {
-                    this._cursorTracker.set_pointer_visible(true);
-                }
-                this._cursorVisibleInhibited = false;
-            }
-        } catch (e) {
-            console.warn(`[speed-cursor] Failed to restore system cursor: ${e.message}`);
+        if (this._cursorVisibleInhibited) {
+            this._cursorTracker.uninhibit_cursor_visibility();
             this._cursorVisibleInhibited = false;
         }
     }

@@ -3,10 +3,6 @@
   "name": "Speed Cursor (Dynamic Size, Fire Halo & Comet Trail)",
   "description": "Smoothly enlarges the mouse pointer with speed, with an optional Fire-Breathing Halo of Light and Comet-Fire motion trail.",
   "shell-version": [
-    "45",
-    "46",
-    "47",
-    "48",
     "49",
     "50"
   ],
