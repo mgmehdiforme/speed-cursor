@@ -1,7 +1,7 @@
 {
   "uuid": "speed-cursor@local",
-  "name": "Speed Cursor (Dynamic Size by Velocity)",
-  "description": "Smoothly enlarges the mouse pointer when moving and scales it bigger the faster you move it.",
+  "name": "Speed Cursor (Dynamic Size, Fire Halo & Comet Trail)",
+  "description": "Smoothly enlarges the mouse pointer with speed, with an optional Fire-Breathing Halo of Light and Comet-Fire motion trail.",
   "shell-version": [
     "45",
     "46",
@@ -10,6 +10,7 @@
     "49",
     "50"
   ],
+  "url": "https://github.com/mgmehdiforme/speed-cursor",
   "settings-schema": "org.gnome.shell.extensions.speed-cursor",
   "version": 1
 }

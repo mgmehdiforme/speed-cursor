@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <radialGradient id="cometGrad" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1.0"/>
+      <stop offset="30%" stop-color="#fff088" stop-opacity="0.90"/>
+      <stop offset="60%" stop-color="#ffaa00" stop-opacity="0.52"/>
+      <stop offset="85%" stop-color="#dd7700" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#884400" stop-opacity="0.0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="url(#cometGrad)"/>
+</svg>

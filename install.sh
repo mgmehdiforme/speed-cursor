@@ -26,7 +26,7 @@ mkdir -p "$TARGET_DIR/icons" "$TARGET_DIR/schemas"
 cp "$SCRIPT_DIR/metadata.json" "$TARGET_DIR/"
 cp "$SCRIPT_DIR/extension.js" "$TARGET_DIR/"
 cp "$SCRIPT_DIR/prefs.js" "$TARGET_DIR/"
-cp "$SCRIPT_DIR/icons/cursor.svg" "$TARGET_DIR/icons/"
+cp "$SCRIPT_DIR/icons/"*.svg "$TARGET_DIR/icons/"
 cp "$SCRIPT_DIR/schemas/org.gnome.shell.extensions.speed-cursor.gschema.xml" "$TARGET_DIR/schemas/"
 cp "$SCRIPT_DIR/schemas/gschemas.compiled" "$TARGET_DIR/schemas/"
 

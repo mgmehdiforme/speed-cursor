@@ -3,8 +3,8 @@
   <schema id="org.gnome.shell.extensions.speed-cursor" path="/org/gnome/shell/extensions/speed-cursor/">
     <key name="effect-enabled" type="b">
       <default>true</default>
-      <summary>Enable Speed Cursor Effect</summary>
-      <description>Toggle the dynamic cursor scaling effect on or off.</description>
+      <summary>Enable Speed Cursor Scaling</summary>
+      <description>Toggle the dynamic velocity-based cursor scaling effect on or off.</description>
     </key>
     <key name="min-move-scale" type="d">
       <default>1.3</default>
@@ -35,6 +35,62 @@
       <default>true</default>
       <summary>Hide System Cursor While Animated</summary>
       <description>Hide the native hardware cursor while the scaled cursor is visible.</description>
+    </key>
+
+    <!-- Fire-Breathing (Halo of Light) -->
+    <key name="fire-breathing-enabled" type="b">
+      <default>true</default>
+      <summary>Enable Fire-Breathing Halo</summary>
+      <description>Animate a breathing halo of light around the mouse pointer to locate it faster.</description>
+    </key>
+    <key name="fire-breathing-always" type="b">
+      <default>true</default>
+      <summary>Always Breathe (Even When Stationary)</summary>
+      <description>Keep the breathing halo pulsing around the pointer even when the mouse is parked.</description>
+    </key>
+    <key name="fire-breathing-size" type="d">
+      <default>88.0</default>
+      <summary>Fire Halo Diameter (px)</summary>
+      <description>Base diameter of the breathing halo of light around the pointer.</description>
+    </key>
+    <key name="fire-breathing-intensity" type="d">
+      <default>0.75</default>
+      <summary>Fire Halo Intensity</summary>
+      <description>Opacity and glow intensity of the breathing halo (0.15 to 1.0).</description>
+    </key>
+    <key name="fire-breathing-speed" type="d">
+      <default>1.4</default>
+      <summary>Breathing Pulse Speed (Hz)</summary>
+      <description>How fast the halo of light breathes in and out.</description>
+    </key>
+
+    <!-- Comet-Fire (Motion Trail) -->
+    <key name="comet-fire-enabled" type="b">
+      <default>true</default>
+      <summary>Enable Comet-Fire Trail</summary>
+      <description>Animate a comet-fire trail behind the moving mouse pointer to show its trajectory.</description>
+    </key>
+    <key name="comet-fire-length" type="i">
+      <default>18</default>
+      <summary>Comet Trail Density / Length</summary>
+      <description>Number of flame particles in the comet trail (6 to 28).</description>
+    </key>
+    <key name="comet-fire-size" type="d">
+      <default>34.0</default>
+      <summary>Comet Head Size (px)</summary>
+      <description>Diameter of the comet-fire head right behind the pointer.</description>
+    </key>
+    <key name="comet-fire-duration" type="d">
+      <default>0.28</default>
+      <summary>Comet Trail Duration (sec)</summary>
+      <description>How long the comet tail lingers before burning out (0.10 to 0.80 seconds).</description>
+    </key>
+
+    <!-- Shared Flame Theme -->
+    <key name="fire-theme" type="s">
+      <default>'ember'</default>
+      <summary>Fire Color Theme</summary>
+      <description>Color palette for Fire-Breathing Halo and Comet-Fire Trail (ember, solar, plasma, emerald, crimson).</description>
     </key>
   </schema>
 </schemalist>

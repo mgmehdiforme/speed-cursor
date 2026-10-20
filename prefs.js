@@ -4,24 +4,37 @@ import Gtk from 'gi://Gtk';
 
 import { ExtensionPreferences } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
+const FIRE_THEMES = [
+    { id: 'ember', label: '🔥 Ember Fire (Orange / Gold)' },
+    { id: 'solar', label: '☀️ Solar Gold (Bright Amber)' },
+    { id: 'plasma', label: '⚡ Blue Plasma (Cyan / Electric Blue)' },
+    { id: 'emerald', label: '🟢 Emerald Wildfire (Neon Green)' },
+    { id: 'crimson', label: '🌹 Crimson Phoenix (Ruby / Magenta)' },
+];
+
 export default class SpeedCursorPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
+        window.set_default_size(640, 720);
 
-        const page = new Adw.PreferencesPage({
-            title: 'Speed Cursor',
+        // =====================================================================
+        // PAGE 1: Speed Scaling
+        // =====================================================================
+        const scalingPage = new Adw.PreferencesPage({
+            title: 'Speed Scaling',
             icon_name: 'input-mouse-symbolic',
         });
-        window.add(page);
+        window.add(scalingPage);
 
         const generalGroup = new Adw.PreferencesGroup({
-            title: 'General',
+            title: 'Dynamic Velocity Scaling',
+            description: 'Enlarge the mouse pointer when moving and scale it bigger with speed.',
         });
-        page.add(generalGroup);
+        scalingPage.add(generalGroup);
 
         const enableRow = new Adw.SwitchRow({
-            title: 'Enable Speed Cursor',
-            subtitle: 'Dynamically enlarge mouse pointer when moving',
+            title: 'Enable Speed Size Scaling',
+            subtitle: 'Dynamically enlarge mouse pointer based on movement velocity',
         });
         settings.bind(
             'effect-enabled',
@@ -31,13 +44,7 @@ export default class SpeedCursorPreferences extends ExtensionPreferences {
         );
         generalGroup.add(enableRow);
 
-        const sizeGroup = new Adw.PreferencesGroup({
-            title: 'Cursor Scaling',
-            description: 'Configure how much the pointer grows when moving slowly vs. fast.',
-        });
-        page.add(sizeGroup);
-
-        sizeGroup.add(
+        generalGroup.add(
             this._createScaleRow(
                 settings,
                 'min-move-scale',
@@ -50,7 +57,7 @@ export default class SpeedCursorPreferences extends ExtensionPreferences {
             )
         );
 
-        sizeGroup.add(
+        generalGroup.add(
             this._createScaleRow(
                 settings,
                 'max-fast-scale',
@@ -67,7 +74,7 @@ export default class SpeedCursorPreferences extends ExtensionPreferences {
             title: 'Velocity & Animation Smoothness',
             description: 'Tune how sensitive the scaling is to pointer speed and how smoothly it animates.',
         });
-        page.add(speedGroup);
+        scalingPage.add(speedGroup);
 
         speedGroup.add(
             this._createScaleRow(
@@ -109,9 +116,9 @@ export default class SpeedCursorPreferences extends ExtensionPreferences {
         );
 
         const behaviorGroup = new Adw.PreferencesGroup({
-            title: 'Behavior',
+            title: 'System Cursor Behavior',
         });
-        page.add(behaviorGroup);
+        scalingPage.add(behaviorGroup);
 
         const hideRow = new Adw.SwitchRow({
             title: 'Hide System Cursor While Animated',
@@ -125,12 +132,181 @@ export default class SpeedCursorPreferences extends ExtensionPreferences {
         );
         behaviorGroup.add(hideRow);
 
+        // =====================================================================
+        // PAGE 2: Fire-Breathing Halo & Comet-Fire Trail
+        // =====================================================================
+        const firePage = new Adw.PreferencesPage({
+            title: 'Fire Halo & Comet',
+            icon_name: 'weather-clear-symbolic',
+        });
+        window.add(firePage);
+
+        const themeGroup = new Adw.PreferencesGroup({
+            title: 'Flame Color Palette',
+            description: 'Choose the visual color theme for both Fire-Breathing Halo and Comet-Fire Trail.',
+        });
+        firePage.add(themeGroup);
+
+        const themeModel = new Gtk.StringList();
+        for (const t of FIRE_THEMES)
+            themeModel.append(t.label);
+
+        const themeRow = new Adw.ComboRow({
+            title: 'Fire Color Theme',
+            subtitle: 'Applies to the breathing halo and comet motion trail',
+            model: themeModel,
+        });
+
+        const currentThemeId = settings.get_string('fire-theme');
+        const initialIdx = Math.max(0, FIRE_THEMES.findIndex(t => t.id === currentThemeId));
+        themeRow.set_selected(initialIdx);
+
+        themeRow.connect('notify::selected', () => {
+            const idx = themeRow.get_selected();
+            const chosen = FIRE_THEMES[idx] ?? FIRE_THEMES[0];
+            settings.set_string('fire-theme', chosen.id);
+        });
+        themeGroup.add(themeRow);
+
+        // Fire-Breathing Halo Group
+        const haloGroup = new Adw.PreferencesGroup({
+            title: 'Fire-Breathing (Halo of Light)',
+            description: 'Animates a living, breathing aura of light around your pointer so you can spot it immediately.',
+        });
+        firePage.add(haloGroup);
+
+        const haloEnableRow = new Adw.SwitchRow({
+            title: 'Enable Fire-Breathing Halo',
+            subtitle: 'Pulse a glowing halo of light around the mouse pointer',
+        });
+        settings.bind(
+            'fire-breathing-enabled',
+            haloEnableRow,
+            'active',
+            Gio.SettingsBindFlags.DEFAULT
+        );
+        haloGroup.add(haloEnableRow);
+
+        const haloAlwaysRow = new Adw.SwitchRow({
+            title: 'Always Breathe (Even When Stationary)',
+            subtitle: 'Keep the halo gently breathing when the mouse stops so a parked pointer is never lost',
+        });
+        settings.bind(
+            'fire-breathing-always',
+            haloAlwaysRow,
+            'active',
+            Gio.SettingsBindFlags.DEFAULT
+        );
+        haloGroup.add(haloAlwaysRow);
+
+        haloGroup.add(
+            this._createScaleRow(
+                settings,
+                'fire-breathing-size',
+                'Halo Diameter (px)',
+                'Size of the breathing light aura around the cursor',
+                40.0,
+                220.0,
+                4.0,
+                0
+            )
+        );
+
+        haloGroup.add(
+            this._createScaleRow(
+                settings,
+                'fire-breathing-intensity',
+                'Halo Glow Intensity',
+                'Brightness and opacity of the breathing halo',
+                0.15,
+                1.0,
+                0.05,
+                2
+            )
+        );
+
+        haloGroup.add(
+            this._createScaleRow(
+                settings,
+                'fire-breathing-speed',
+                'Breathing Pulse Frequency (Hz)',
+                'How fast the halo breathes in and out',
+                0.3,
+                4.0,
+                0.1,
+                1
+            )
+        );
+
+        // Comet-Fire Trail Group
+        const cometGroup = new Adw.PreferencesGroup({
+            title: 'Comet-Fire (Motion Trail)',
+            description: 'Leaves a glowing comet tail when moving so you can see where the pointer came from and where it went.',
+        });
+        firePage.add(cometGroup);
+
+        const cometEnableRow = new Adw.SwitchRow({
+            title: 'Enable Comet-Fire Trail',
+            subtitle: 'Ignite a directional flame trail when moving the mouse',
+        });
+        settings.bind(
+            'comet-fire-enabled',
+            cometEnableRow,
+            'active',
+            Gio.SettingsBindFlags.DEFAULT
+        );
+        cometGroup.add(cometEnableRow);
+
+        cometGroup.add(
+            this._createIntScaleRow(
+                settings,
+                'comet-fire-length',
+                'Comet Trail Length (Particles)',
+                'Number of glowing flame nodes in the comet tail',
+                6,
+                28,
+                1
+            )
+        );
+
+        cometGroup.add(
+            this._createScaleRow(
+                settings,
+                'comet-fire-size',
+                'Comet Head Thickness (px)',
+                'Width of the flame trail right behind the pointer',
+                14.0,
+                80.0,
+                2.0,
+                0
+            )
+        );
+
+        cometGroup.add(
+            this._createScaleRow(
+                settings,
+                'comet-fire-duration',
+                'Trail Burnout Duration (sec)',
+                'How long the comet trail lingers before fading out',
+                0.10,
+                0.80,
+                0.02,
+                2
+            )
+        );
+
+        // Reset Group
+        const resetGroup = new Adw.PreferencesGroup({
+            title: 'Reset',
+        });
+        firePage.add(resetGroup);
+
         const resetRow = new Adw.ActionRow({
-            title: 'Reset to Defaults',
-            subtitle: 'Restore all Speed Cursor settings to their recommended default values',
+            title: 'Reset All Settings to Defaults',
+            subtitle: 'Restore Speed Scaling, Fire-Breathing Halo, and Comet-Fire Trail defaults',
         });
         const resetButton = new Gtk.Button({
-            label: 'Reset',
+            label: 'Reset Defaults',
             valign: Gtk.Align.CENTER,
             css_classes: ['destructive-action'],
         });
@@ -143,12 +319,23 @@ export default class SpeedCursorPreferences extends ExtensionPreferences {
                 'grow-smoothing',
                 'shrink-smoothing',
                 'hide-system-cursor',
+                'fire-breathing-enabled',
+                'fire-breathing-always',
+                'fire-breathing-size',
+                'fire-breathing-intensity',
+                'fire-breathing-speed',
+                'comet-fire-enabled',
+                'comet-fire-length',
+                'comet-fire-size',
+                'comet-fire-duration',
+                'fire-theme',
             ]) {
                 settings.reset(key);
             }
+            themeRow.set_selected(0);
         });
         resetRow.add_suffix(resetButton);
-        behaviorGroup.add(resetRow);
+        resetGroup.add(resetRow);
     }
 
     _createScaleRow(settings, key, title, subtitle, min, max, step, digits) {
@@ -172,7 +359,7 @@ export default class SpeedCursorPreferences extends ExtensionPreferences {
             draw_value: true,
             hexpand: true,
             valign: Gtk.Align.CENTER,
-            width_request: 220,
+            width_request: 210,
         });
 
         adjustment.connect('value-changed', () => {
@@ -182,6 +369,48 @@ export default class SpeedCursorPreferences extends ExtensionPreferences {
         const connId = settings.connect(`changed::${key}`, () => {
             const val = settings.get_double(key);
             if (Math.abs(adjustment.get_value() - val) > 1e-4)
+                adjustment.set_value(val);
+        });
+
+        row.connect('destroy', () => {
+            settings.disconnect(connId);
+        });
+
+        row.add_suffix(scale);
+        return row;
+    }
+
+    _createIntScaleRow(settings, key, title, subtitle, min, max, step) {
+        const row = new Adw.ActionRow({
+            title,
+            subtitle,
+        });
+
+        const adjustment = new Gtk.Adjustment({
+            lower: min,
+            upper: max,
+            step_increment: step,
+            page_increment: step * 4,
+            value: settings.get_int(key),
+        });
+
+        const scale = new Gtk.Scale({
+            orientation: Gtk.Orientation.HORIZONTAL,
+            adjustment,
+            digits: 0,
+            draw_value: true,
+            hexpand: true,
+            valign: Gtk.Align.CENTER,
+            width_request: 210,
+        });
+
+        adjustment.connect('value-changed', () => {
+            settings.set_int(key, Math.round(adjustment.get_value()));
+        });
+
+        const connId = settings.connect(`changed::${key}`, () => {
+            const val = settings.get_int(key);
+            if (Math.round(adjustment.get_value()) !== val)
                 adjustment.set_value(val);
         });
 
