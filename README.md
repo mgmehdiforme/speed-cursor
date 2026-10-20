@@ -1,45 +1,71 @@
-# Speed Cursor — Dynamic Velocity Pointer, Fire-Breathing Halo & Comet-Fire Trail for GNOME
+<div align="center">
+  <img src="assets/icon-256.png" alt="Speed Cursor Icon" width="128" height="128" />
+  <h1>Speed Cursor — Dynamic Size, Fire Halo &amp; Comet Trail</h1>
+  <p>
+    <strong>Never lose your mouse pointer again on large, 4K, or multi-monitor Linux desktops.</strong><br/>
+    Smoothly enlarges your cursor with movement velocity, surrounds it with a breathing halo of light, and ignites a directional comet-fire motion trail.
+  </p>
 
-**Speed Cursor** is a lightweight GNOME Shell extension (for **GNOME 45 – 50+**, Wayland & X11) that makes your mouse pointer impossible to lose and effortless to track across large or multi-monitor displays:
-
-1. **⚡ Dynamic Velocity Scaling:** Smoothly enlarges your mouse pointer as soon as it starts moving and scales it progressively larger the faster you move it.
-2. **🔥 Fire-Breathing (Halo of Light):** Animates a living, breathing aura of light around your pointer (both while parked and stoked brighter when moving) so you can spot it immediately.
-3. **☄️ Comet-Fire (Motion Trail):** Ignites a directional, tapering comet-fire trail behind your moving cursor so your eyes immediately see where the pointer came from and where it went.
-
-All three effects can be toggled independently from the **top-right GNOME Quick Settings menu** or the **Speed Cursor Settings** app!
-
----
-
-## ✨ Features
-
-- **Continuous Velocity Scaling:** Smoothly interpolates pointer size from normal (`1.0x`) when stationary $\rightarrow$ slightly larger (`1.3x`) when moving slowly $\rightarrow$ largest (`4.0x`–`8.0x`) when moving quickly.
-- **Fire-Breathing Halo of Light:** Dual-harmonic breathing glow around the cursor with optional stationary pulsing ("Always Breathe") and velocity stoking.
-- **Comet-Fire Motion Trail:** Zero-GC object-pooled particle ribbon with upward thermal buoyancy, flame turbulence, and smooth tail tapering.
-- **5 Built-In Flame Color Themes:**
-  - 🔥 **Ember Fire** (Golden core + Orange/Red flame)
-  - ☀️ **Solar Gold** (White-Gold core + Bright Amber)
-  - ⚡ **Blue Plasma** (Ice-White core + Cyan/Electric Blue)
-  - 🟢 **Emerald Wildfire** (Lime core + Neon Green)
-  - 🌹 **Crimson Phoenix** (Rose core + Ruby/Magenta)
-- **Quick Settings Integration:** Toggle **Speed Size Scaling**, **Fire-Breathing Halo**, and **Comet-Fire Trail** or pick size presets right from the top-right GNOME system menu.
-- **Fullscreen Media & Game Aware:** Automatically pauses visuals when a video player or game hides the hardware cursor.
+  <p>
+    <a href="https://extensions.gnome.org/extension/11388/speed-cursor-dynamic-size-fire-halo-comet-trail/">
+      <img src="https://img.shields.io/badge/GNOME_Extensions-Install_Now-4A86CF?style=for-the-badge&logo=gnome&logoColor=white" alt="Get it on GNOME Extensions" />
+    </a>
+    <a href="https://github.com/mgmehdiforme/speed-cursor/releases/latest">
+      <img src="https://img.shields.io/github/v/release/mgmehdiforme/speed-cursor?style=for-the-badge&color=ff6600" alt="Latest Release" />
+    </a>
+    <a href="LICENSE">
+      <img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge" alt="MIT License" />
+    </a>
+  </p>
+</div>
 
 ---
 
-## 🚀 Quick Installation
+## 📸 Preview in Action
 
-### Option 1: Clone & Run the Installer (Recommended)
+<div align="center">
+  <img src="assets/screenshot.png" alt="Speed Cursor with Fire-Breathing Halo and Comet-Fire Trail on Ubuntu GNOME" width="90%" />
+  <p><em>Enlarged velocity-scaled pointer with the <strong>Fire-Breathing Halo</strong> at the tip and a curved <strong>Comet-Fire Motion Trail</strong> showing the exact path traveled.</em></p>
+</div>
 
+---
+
+## ✨ Why Speed Cursor?
+
+Traditional "shake-to-find" utilities only trigger after you violently shake the mouse back and forth. **Speed Cursor** is designed for effortless, continuous spatial awareness:
+
+1. **⚡ Continuous Velocity Scaling (`Speed Size Scaling`)**
+   * Smoothly scales your cursor from `1.0x` (stationary) $\rightarrow$ `1.3x` (slow movement) $\rightarrow$ up to `4.0x–8.0x` (fast sweeps).
+   * Uses a crisp, high-resolution vector cursor locked to the exact pointer hotspot so the tip never shifts or blurs.
+2. **🔥 Fire-Breathing (`Halo of Light`)**
+   * Surrounds the cursor tip with a dual-harmonic breathing aura of light so you can spot a parked or moving pointer immediately.
+   * Automatically **stokes brighter and wider** when you move the mouse faster, and gently breathes like a warm ember when stationary.
+3. **☄️ Comet-Fire (`Directional Motion Trail`)**
+   * Leaves a smooth, tapering ribbon of fire behind your moving pointer so your eyes immediately see **where the mouse was** and **which direction it moved**.
+   * Built on a zero-GC pre-allocated particle pool with path interpolation and upward thermal drift.
+4. **🎨 5 Built-In Flame Color Themes**
+   * Choose between **🔥 Ember Fire**, **☀️ Solar Gold**, **⚡ Blue Plasma**, **🟢 Emerald Wildfire**, and **🌹 Crimson Phoenix** to match any wallpaper or desktop theme.
+5. **🎛️ One-Click Quick Settings & Full Libadwaita Preferences**
+   * Toggle **Speed Size Scaling**, **Fire-Breathing Halo**, and **Comet-Fire Trail** independently right from the top-right GNOME Quick Settings menu, or fine-tune every slider in the native Settings window.
+6. **🎬 Fullscreen Video & Game Smart Detection**
+   * Automatically pauses effects whenever a video player or game hides the system pointer, and uses **0% CPU** when idle.
+
+---
+
+## 🚀 Easy Installation
+
+### Option 1: Install from GNOME Extensions (1-Click)
+Visit the official **[GNOME Extensions Page](https://extensions.gnome.org/extension/11388/speed-cursor-dynamic-size-fire-halo-comet-trail/)** and toggle the switch to **ON**.
+
+### Option 2: Clone & Run the Installer
 ```bash
 git clone https://github.com/mgmehdiforme/speed-cursor.git
 cd speed-cursor
 ./install.sh
 ```
 
-### Option 2: Install From Release `.shell-extension.zip` Bundle
-
-Download `speed-cursor@local.shell-extension.zip` from the [Releases page](https://github.com/mgmehdiforme/speed-cursor/releases) and run:
-
+### Option 3: Install From Release `.zip` Bundle
+Download the latest `.zip` from [GitHub Releases](https://github.com/mgmehdiforme/speed-cursor/releases/latest) and run:
 ```bash
 gnome-extensions install --force speed-cursor@local.shell-extension.zip
 gnome-extensions enable speed-cursor@local
@@ -49,14 +75,29 @@ gnome-extensions enable speed-cursor@local
 
 ## ⚙️ Configuration & Settings
 
-Open the settings window using any of these methods:
+You can customize **Speed Cursor** from three places:
 
-1. **Top-Right Quick Settings Menu:** Open the GNOME system menu $\rightarrow$ click the arrow (`>`) on **Speed Cursor** $\rightarrow$ toggle individual effects or click **Speed Cursor Settings…**.
-2. **Applications Menu / Search:** Press the `Super` key and search for **Speed Cursor Settings**.
+1. **Top-Right GNOME Quick Settings Menu:**
+   Click the system status menu in the top-right corner $\rightarrow$ click the arrow (`>`) on **Speed Cursor** to toggle individual effects, pick a size preset, or open **Speed Cursor Settings…**.
+2. **Desktop App Launcher:**
+   Press the `Super` key and search for **Speed Cursor Settings**.
 3. **Terminal:**
    ```bash
    gnome-extensions prefs speed-cursor@local
    ```
+
+| Setting | Key | Default | Description |
+| :--- | :--- | :---: | :--- |
+| **Speed Size Scaling** | `effect-enabled` | `true` | Enlarge pointer dynamically based on movement speed |
+| **Minimum Moving Size** | `min-move-scale` | `1.3` | Scale multiplier as soon as the mouse starts moving |
+| **Maximum Fast Size** | `max-fast-scale` | `4.0` | Maximum scale multiplier at high speed (`1.5x–8.0x`) |
+| **Fast Speed Threshold** | `max-speed-threshold` | `2600` | Velocity ($\text{px/s}$) required to reach maximum size |
+| **Fire-Breathing Halo** | `fire-breathing-enabled` | `true` | Animate a breathing halo of light around the pointer |
+| **Always Breathe** | `fire-breathing-always` | `true` | Keep halo gently breathing even when mouse is parked |
+| **Halo Diameter** | `fire-breathing-size` | `88` | Diameter of the breathing light aura (`40px–220px`) |
+| **Comet-Fire Trail** | `comet-fire-enabled` | `true` | Ignite a directional comet trail on mouse movement |
+| **Comet Trail Length** | `comet-fire-length` | `18` | Number of flame particles in the comet tail (`6–28`) |
+| **Flame Color Theme** | `fire-theme` | `'ember'` | `ember`, `solar`, `plasma`, `emerald`, or `crimson` |
 
 ---
 
@@ -70,4 +111,4 @@ Open the settings window using any of these methods:
 
 ## 📄 License
 
-Released under the [MIT License](LICENSE).
+Released under the [MIT License](LICENSE). Created by [Mehdi Golzari](https://github.com/mgmehdiforme).
