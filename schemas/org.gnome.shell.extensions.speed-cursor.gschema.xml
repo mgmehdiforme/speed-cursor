@@ -92,5 +92,32 @@
       <summary>Fire Color Theme</summary>
       <description>Color palette for Fire-Breathing Halo and Comet-Fire Trail (ember, solar, plasma, emerald, crimson).</description>
     </key>
+
+    <!-- Click Animation (Screen Recording Highlight) -->
+    <key name="click-effect-enabled" type="b">
+      <default>true</default>
+      <summary>Enable Click Ripple Animation</summary>
+      <description>Show an expanding shockwave ripple at the exact screen location where you click (ideal for screen recording).</description>
+    </key>
+    <key name="click-color-by-button" type="b">
+      <default>true</default>
+      <summary>Distinct Colors per Mouse Button</summary>
+      <description>Use distinct ring colors for Left Click (Gold/Orange), Right Click (Cyan/Blue), and Middle Click (Emerald/Green).</description>
+    </key>
+    <key name="click-effect-size" type="d">
+      <default>82.0</default>
+      <summary>Click Ripple Diameter (px)</summary>
+      <description>Maximum expanded diameter of the click ripple shockwave (36 to 180 px).</description>
+    </key>
+    <key name="click-effect-duration" type="d">
+      <default>0.42</default>
+      <summary>Click Ripple Duration (sec)</summary>
+      <description>How long each click ripple animation lasts (0.18 to 1.00 seconds).</description>
+    </key>
+    <key name="click-effect-intensity" type="d">
+      <default>0.92</default>
+      <summary>Click Ripple Opacity</summary>
+      <description>Peak opacity of the click shockwave ring (0.20 to 1.00).</description>
+    </key>
   </schema>
 </schemalist>

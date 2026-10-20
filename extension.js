@@ -13,7 +13,9 @@ import { getPointerWatcher } from 'resource:///org/gnome/shell/ui/pointerWatcher
 const ICON_RENDER_SIZE = 128;
 const HALO_RENDER_SIZE = 128;
 const COMET_RENDER_SIZE = 64;
+const CLICK_RENDER_SIZE = 128;
 const MAX_COMET_POOL = 28;
+const MAX_CLICK_POOL = 8;
 const HOT_X_RATIO = 16 / 96;
 const HOT_Y_RATIO = 12 / 96;
 const FRAME_INTERVAL_MS = 16; // ~60 FPS
@@ -39,12 +41,13 @@ class SpeedCursorQuickToggle extends QuickSettings.QuickMenuToggle {
             this._settings.set_boolean('effect-enabled', target);
             this._settings.set_boolean('fire-breathing-enabled', target);
             this._settings.set_boolean('comet-fire-enabled', target);
+            this._settings.set_boolean('click-effect-enabled', target);
         });
 
         this.menu.setHeader(
             'input-mouse-symbolic',
             'Speed Cursor & Fire FX',
-            'Velocity scaling, breathing halo & comet trail'
+            'Velocity scaling, fire halo, comet trail & click ripples'
         );
 
         const featuresSection = new PopupMenu.PopupMenuSection();
@@ -75,6 +78,15 @@ class SpeedCursorQuickToggle extends QuickSettings.QuickMenuToggle {
             this._settings.set_boolean('comet-fire-enabled', state);
         });
         featuresSection.addMenuItem(this._cometSwitch);
+
+        this._clickSwitch = new PopupMenu.PopupSwitchMenuItem(
+            'Click Ripple (Screen Recording)',
+            this._settings.get_boolean('click-effect-enabled')
+        );
+        this._clickSwitch.connect('toggled', (_item, state) => {
+            this._settings.set_boolean('click-effect-enabled', state);
+        });
+        featuresSection.addMenuItem(this._clickSwitch);
 
         this.menu.addMenuItem(featuresSection);
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
@@ -117,7 +129,8 @@ class SpeedCursorQuickToggle extends QuickSettings.QuickMenuToggle {
         return (
             this._settings.get_boolean('effect-enabled') ||
             this._settings.get_boolean('fire-breathing-enabled') ||
-            this._settings.get_boolean('comet-fire-enabled')
+            this._settings.get_boolean('comet-fire-enabled') ||
+            this._settings.get_boolean('click-effect-enabled')
         );
     }
 
@@ -125,12 +138,14 @@ class SpeedCursorQuickToggle extends QuickSettings.QuickMenuToggle {
         const scaleOn = this._settings.get_boolean('effect-enabled');
         const haloOn = this._settings.get_boolean('fire-breathing-enabled');
         const cometOn = this._settings.get_boolean('comet-fire-enabled');
+        const clickOn = this._settings.get_boolean('click-effect-enabled');
         const maxScale = this._settings.get_double('max-fast-scale');
 
-        this.checked = scaleOn || haloOn || cometOn;
+        this.checked = scaleOn || haloOn || cometOn || clickOn;
         this._scaleSwitch.setToggleState(scaleOn);
         this._haloSwitch.setToggleState(haloOn);
         this._cometSwitch.setToggleState(cometOn);
+        this._clickSwitch.setToggleState(clickOn);
 
         const activeParts = [];
         if (scaleOn)
@@ -139,6 +154,8 @@ class SpeedCursorQuickToggle extends QuickSettings.QuickMenuToggle {
             activeParts.push('Halo');
         if (cometOn)
             activeParts.push('Comet');
+        if (clickOn)
+            activeParts.push('Click');
 
         this.subtitle = activeParts.length > 0 ? activeParts.join(' • ') : 'Off';
 
@@ -163,6 +180,7 @@ class SpeedCursorQuickToggle extends QuickSettings.QuickMenuToggle {
         this._scaleSwitch = null;
         this._haloSwitch = null;
         this._cometSwitch = null;
+        this._clickSwitch = null;
         super.destroy();
     }
 });
@@ -214,6 +232,7 @@ export default class SpeedCursorExtension extends Extension {
         this._currentScale = 1.0;
         this._haloFade = 0.0;
         this._breathPhase = 0.0;
+        this._pressedButtonsMask = 0;
         this._animLoopId = 0;
 
         this._hotOffsetX = ICON_RENDER_SIZE * HOT_X_RATIO;
@@ -230,6 +249,11 @@ export default class SpeedCursorExtension extends Extension {
         this._pointerWatch = this._pointerWatcher.addWatch(
             FRAME_INTERVAL_MS,
             this._onPointerMoved.bind(this)
+        );
+
+        this._stageEventId = global.stage.connect(
+            'captured-event::button',
+            this._onStageButtonEvent.bind(this)
         );
 
         this._indicator = new SpeedCursorIndicator(
@@ -275,7 +299,40 @@ export default class SpeedCursorExtension extends Extension {
             });
         }
 
-        // 2. Fire-Breathing Halo layers (middle layer, centered on pointer tip)
+        // 2. Click Ripple shockwave pool (world-space anchored rings for screen recording)
+        this._clickPool = [];
+        this._clickSpawnCursor = 0;
+        this._clickGIcons = {
+            left: Gio.Icon.new_for_string(`${this.path}/icons/click-left.svg`),
+            middle: Gio.Icon.new_for_string(`${this.path}/icons/click-middle.svg`),
+            right: Gio.Icon.new_for_string(`${this.path}/icons/click-right.svg`),
+        };
+
+        for (let i = 0; i < MAX_CLICK_POOL; i++) {
+            const ring = new St.Icon({
+                gicon: this._clickGIcons.left,
+                icon_size: CLICK_RENDER_SIZE,
+                style: 'padding: 0px; margin: 0px;',
+                reactive: false,
+                can_focus: false,
+                visible: false,
+            });
+            ring.set_size(CLICK_RENDER_SIZE, CLICK_RENDER_SIZE);
+            ring.set_pivot_point(0.5, 0.5);
+            Main.uiGroup.add_child(ring);
+
+            this._clickPool.push({
+                actor: ring,
+                active: false,
+                x: 0,
+                y: 0,
+                age: 0,
+                maxAge: 0.42,
+                maxDiameter: 82.0,
+            });
+        }
+
+        // 3. Fire-Breathing Halo layers (centered on pointer tip)
         const haloGicon = this._getThemeGIcon('halo', 'ember');
         this._haloOuter = new St.Icon({
             gicon: haloGicon,
@@ -301,7 +358,7 @@ export default class SpeedCursorExtension extends Extension {
         this._haloCore.set_pivot_point(0.5, 0.5);
         Main.uiGroup.add_child(this._haloCore);
 
-        // 3. Sharp vector cursor arrow (topmost layer)
+        // 4. Sharp vector cursor arrow (topmost layer)
         const cursorGicon = Gio.Icon.new_for_string(`${this.path}/icons/cursor.svg`);
         this._actor = new St.Icon({
             gicon: cursorGicon,
@@ -328,6 +385,7 @@ export default class SpeedCursorExtension extends Extension {
 
         const haloGicon = this._getThemeGIcon('halo', theme);
         const cometGicon = this._getThemeGIcon('comet', theme);
+        this._themedClickGIcon = this._getThemeGIcon('click', theme);
 
         this._haloOuter.gicon = haloGicon;
         this._haloCore.gicon = haloGicon;
@@ -376,6 +434,16 @@ export default class SpeedCursorExtension extends Extension {
         this._cometFireSize = Math.max(12.0, this._settings.get_double('comet-fire-size'));
         this._cometFireDuration = Math.max(0.08, this._settings.get_double('comet-fire-duration'));
 
+        // Click Ripple settings
+        this._clickEffectEnabled = this._settings.get_boolean('click-effect-enabled');
+        this._clickColorByButton = this._settings.get_boolean('click-color-by-button');
+        this._clickEffectSize = Math.max(24.0, this._settings.get_double('click-effect-size'));
+        this._clickEffectDuration = Math.max(0.12, this._settings.get_double('click-effect-duration'));
+        this._clickEffectIntensity = Math.min(
+            1.0,
+            Math.max(0.15, this._settings.get_double('click-effect-intensity'))
+        );
+
         const theme = this._settings.get_string('fire-theme') || 'ember';
         this._updateThemeIcons(theme);
 
@@ -401,6 +469,13 @@ export default class SpeedCursorExtension extends Extension {
                 node.actor.hide();
             }
         }
+
+        if (!this._clickEffectEnabled) {
+            for (const node of this._clickPool) {
+                node.active = false;
+                node.actor.hide();
+            }
+        }
     }
 
     _stopAnimationAndRestoreCursor() {
@@ -418,7 +493,97 @@ export default class SpeedCursorExtension extends Extension {
             node.active = false;
             node.actor.hide();
         }
+        for (const node of this._clickPool) {
+            node.active = false;
+            node.actor.hide();
+        }
         this._showSystemCursor();
+    }
+
+    _onStageButtonEvent(_stage, event) {
+        if (!this._clickEffectEnabled)
+            return Clutter.EVENT_PROPAGATE;
+
+        const evType = event.type();
+        const button = event.get_button();
+        if (button < 1 || button > 3)
+            return Clutter.EVENT_PROPAGATE;
+
+        const bit = 1 << button;
+        if (evType === Clutter.EventType.BUTTON_PRESS) {
+            if ((this._pressedButtonsMask & bit) === 0) {
+                this._pressedButtonsMask |= bit;
+                const [x, y] = event.get_coords();
+                this._spawnClickRipple(x, y, button);
+            }
+        } else if (evType === Clutter.EventType.BUTTON_RELEASE) {
+            this._pressedButtonsMask &= ~bit;
+        }
+
+        return Clutter.EVENT_PROPAGATE;
+    }
+
+    _syncModifierButtons(x, y, mods) {
+        if (!this._clickEffectEnabled)
+            return;
+
+        const checks = [
+            { button: 1, mask: Clutter.ModifierType.BUTTON1_MASK },
+            { button: 2, mask: Clutter.ModifierType.BUTTON2_MASK },
+            { button: 3, mask: Clutter.ModifierType.BUTTON3_MASK },
+        ];
+
+        for (const { button, mask } of checks) {
+            const bit = 1 << button;
+            const isPressed = (mods & mask) !== 0;
+            if (isPressed && (this._pressedButtonsMask & bit) === 0) {
+                this._pressedButtonsMask |= bit;
+                this._spawnClickRipple(x, y, button);
+            } else if (!isPressed && (this._pressedButtonsMask & bit) !== 0) {
+                this._pressedButtonsMask &= ~bit;
+            }
+        }
+    }
+
+    _spawnClickRipple(x, y, button) {
+        if (!this._clickEffectEnabled)
+            return;
+
+        if (!this._cursorVisibleInhibited && !this._cursorTracker.get_pointer_visible())
+            return;
+
+        const idx = this._clickSpawnCursor % MAX_CLICK_POOL;
+        this._clickSpawnCursor = (this._clickSpawnCursor + 1) % MAX_CLICK_POOL;
+
+        const node = this._clickPool[idx];
+        node.active = true;
+        node.x = x;
+        node.y = y;
+        node.age = 0.0;
+        node.maxAge = this._clickEffectDuration;
+        node.maxDiameter = this._clickEffectSize;
+
+        if (this._clickColorByButton) {
+            if (button === 3)
+                node.actor.gicon = this._clickGIcons.right;
+            else if (button === 2)
+                node.actor.gicon = this._clickGIcons.middle;
+            else
+                node.actor.gicon = this._clickGIcons.left;
+        } else {
+            node.actor.gicon = this._themedClickGIcon;
+        }
+
+        const half = CLICK_RENDER_SIZE * 0.5;
+        node.actor.set_position(x - half, y - half);
+        node.actor.set_scale(0.15, 0.15);
+        node.actor.opacity = Math.round(255 * this._clickEffectIntensity);
+        node.actor.show();
+        Main.uiGroup.set_child_above_sibling(node.actor, null);
+        this._raiseActorsToTop();
+
+        if (!this._animLoopId)
+            this._startAnimationLoop();
     }
 
     _spawnCometSegment(x0, y0, x1, y1, instantSpeed) {
@@ -428,7 +593,6 @@ export default class SpeedCursorExtension extends Extension {
         if (dist < 2.5)
             return;
 
-        // Interpolate 1 to 3 flame nodes along fast movement segments for a seamless tail
         const steps = Math.min(3, Math.max(1, Math.floor(dist / 14)));
         const speedFactor = Math.min(1.4, Math.max(0.65, instantSpeed / 1400));
 
@@ -463,6 +627,9 @@ export default class SpeedCursorExtension extends Extension {
     }
 
     _onPointerMoved(x, y) {
+        const [, , mods] = global.get_pointer();
+        this._syncModifierButtons(x, y, mods);
+
         if (!this._effectEnabled && !this._fireBreathingEnabled && !this._cometFireEnabled)
             return;
 
@@ -476,7 +643,6 @@ export default class SpeedCursorExtension extends Extension {
         this._lastY = y;
         this._lastMoveTimeUs = nowUs;
 
-        // If another application intentionally hid the cursor (e.g. video player / game), skip
         if (!this._cursorVisibleInhibited && !this._cursorTracker.get_pointer_visible())
             return;
 
@@ -514,7 +680,6 @@ export default class SpeedCursorExtension extends Extension {
         const dt = Math.min(0.05, Math.max(0.004, (nowUs - this._lastFrameTimeUs) / 1e6));
         this._lastFrameTimeUs = nowUs;
 
-        // If another app hid the system pointer (fullscreen video/game), pause visuals
         if (!this._cursorVisibleInhibited && !this._cursorTracker.get_pointer_visible()) {
             this._actor.hide();
             this._haloOuter.hide();
@@ -524,7 +689,8 @@ export default class SpeedCursorExtension extends Extension {
 
         const elapsedSinceMoveUs = nowUs - this._lastMoveTimeUs;
         const isMoving = elapsedSinceMoveUs < STOP_TIMEOUT_US;
-        const [curX, curY] = global.get_pointer();
+        const [curX, curY, mods] = global.get_pointer();
+        this._syncModifierButtons(curX, curY, mods);
 
         if (!isMoving) {
             this._smoothSpeed *= 0.80;
@@ -567,7 +733,34 @@ export default class SpeedCursorExtension extends Extension {
             }
         }
 
-        // 2. Update Fire-Breathing Halo around pointer
+        // 2. Update Click Ripple shockwave rings (anchored at click coordinates)
+        let activeClickCount = 0;
+        if (this._clickEffectEnabled) {
+            for (let i = 0; i < this._clickPool.length; i++) {
+                const node = this._clickPool[i];
+                if (!node.active)
+                    continue;
+
+                node.age += dt;
+                if (node.age >= node.maxAge) {
+                    node.active = false;
+                    node.actor.hide();
+                    continue;
+                }
+
+                activeClickCount++;
+                const progress = node.age / node.maxAge;
+                const easeOut = 1.0 - Math.pow(1.0 - progress, 3.0);
+                const currentDiameter = node.maxDiameter * (0.20 + 0.85 * easeOut);
+                const scale = currentDiameter / CLICK_RENDER_SIZE;
+                const fade = Math.pow(1.0 - progress, 1.35) * this._clickEffectIntensity;
+
+                node.actor.set_scale(scale, scale);
+                node.actor.opacity = Math.round(255 * fade);
+            }
+        }
+
+        // 3. Update Fire-Breathing Halo around pointer
         let haloActive = false;
         if (this._fireBreathingEnabled) {
             const wantHalo = this._fireBreathingAlways || isMoving || this._smoothSpeed > 10.0;
@@ -618,7 +811,7 @@ export default class SpeedCursorExtension extends Extension {
             }
         }
 
-        // 3. Update Speed-Scaled Cursor Arrow
+        // 4. Update Speed-Scaled Cursor Arrow
         let cursorScalingActive = false;
         if (this._effectEnabled) {
             let targetScale = 1.0;
@@ -656,8 +849,14 @@ export default class SpeedCursorExtension extends Extension {
             }
         }
 
-        // Stop the animation loop when completely idle and no persistent halo is active
-        if (!isMoving && !cursorScalingActive && !haloActive && activeCometCount === 0) {
+        // Stop the animation loop when completely idle and no persistent halo/ripples are active
+        if (
+            !isMoving &&
+            !cursorScalingActive &&
+            !haloActive &&
+            activeCometCount === 0 &&
+            activeClickCount === 0
+        ) {
             this._animLoopId = 0;
             this._showSystemCursor();
             return GLib.SOURCE_REMOVE;
@@ -696,6 +895,11 @@ export default class SpeedCursorExtension extends Extension {
             this._indicator = null;
         }
 
+        if (this._stageEventId) {
+            global.stage.disconnect(this._stageEventId);
+            this._stageEventId = 0;
+        }
+
         if (this._pointerWatch) {
             this._pointerWatch.remove();
             this._pointerWatch = null;
@@ -708,6 +912,15 @@ export default class SpeedCursorExtension extends Extension {
                 node.actor.destroy();
             this._cometPool = null;
         }
+
+        if (this._clickPool) {
+            for (const node of this._clickPool)
+                node.actor.destroy();
+            this._clickPool = null;
+        }
+
+        this._clickGIcons = null;
+        this._themedClickGIcon = null;
 
         if (this._haloOuter) {
             this._haloOuter.destroy();

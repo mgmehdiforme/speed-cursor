@@ -295,15 +295,93 @@ export default class SpeedCursorPreferences extends ExtensionPreferences {
             )
         );
 
+        // =====================================================================
+        // PAGE 3: Click Ripple (Screen Recording)
+        // =====================================================================
+        const clickPage = new Adw.PreferencesPage({
+            title: 'Click Ripple',
+            icon_name: 'media-record-symbolic',
+        });
+        window.add(clickPage);
+
+        const clickGroup = new Adw.PreferencesGroup({
+            title: 'On-Click Animation (Screen Recording Helper)',
+            description: 'Spawns an expanding concentric shockwave ring at the exact screen position where you click so viewers can clearly follow every click in tutorials, demos, and screen recordings.',
+        });
+        clickPage.add(clickGroup);
+
+        const clickEnableRow = new Adw.SwitchRow({
+            title: 'Enable On-Click Ripple Animation',
+            subtitle: 'Show an expanding visual pulse at the cursor tip whenever a mouse button is pressed',
+        });
+        settings.bind(
+            'click-effect-enabled',
+            clickEnableRow,
+            'active',
+            Gio.SettingsBindFlags.DEFAULT
+        );
+        clickGroup.add(clickEnableRow);
+
+        const clickColorByButtonRow = new Adw.SwitchRow({
+            title: 'Color-Code by Mouse Button',
+            subtitle: 'Left Click = Amber Gold, Right Click = Electric Cyan, Middle Click = Neon Emerald (when off, uses your Fire Color Theme)',
+        });
+        settings.bind(
+            'click-color-by-button',
+            clickColorByButtonRow,
+            'active',
+            Gio.SettingsBindFlags.DEFAULT
+        );
+        clickGroup.add(clickColorByButtonRow);
+
+        clickGroup.add(
+            this._createScaleRow(
+                settings,
+                'click-effect-size',
+                'Ripple Expansion Diameter (px)',
+                'Maximum diameter of the expanding click ring',
+                48.0,
+                240.0,
+                4.0,
+                0
+            )
+        );
+
+        clickGroup.add(
+            this._createScaleRow(
+                settings,
+                'click-effect-duration',
+                'Ripple Animation Duration (sec)',
+                'How long each click shockwave stays visible on screen',
+                0.15,
+                1.00,
+                0.05,
+                2
+            )
+        );
+
+        clickGroup.add(
+            this._createScaleRow(
+                settings,
+                'click-effect-intensity',
+                'Ripple Glow Opacity',
+                'Peak brightness and visibility of the click shockwave ring',
+                0.20,
+                1.00,
+                0.05,
+                2
+            )
+        );
+
         // Reset Group
         const resetGroup = new Adw.PreferencesGroup({
             title: 'Reset',
         });
-        firePage.add(resetGroup);
+        clickPage.add(resetGroup);
 
         const resetRow = new Adw.ActionRow({
             title: 'Reset All Settings to Defaults',
-            subtitle: 'Restore Speed Scaling, Fire-Breathing Halo, and Comet-Fire Trail defaults',
+            subtitle: 'Restore Speed Scaling, Fire Halo, Comet Trail, and Click Ripple defaults',
         });
         const resetButton = new Gtk.Button({
             label: 'Reset Defaults',
@@ -329,6 +407,11 @@ export default class SpeedCursorPreferences extends ExtensionPreferences {
                 'comet-fire-size',
                 'comet-fire-duration',
                 'fire-theme',
+                'click-effect-enabled',
+                'click-color-by-button',
+                'click-effect-size',
+                'click-effect-duration',
+                'click-effect-intensity',
             ]) {
                 settings.reset(key);
             }

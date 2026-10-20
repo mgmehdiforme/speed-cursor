@@ -1,7 +1,7 @@
 {
   "uuid": "speed-cursor@local",
-  "name": "Speed Cursor (Dynamic Size, Fire Halo & Comet Trail)",
-  "description": "Never lose your mouse pointer again! Smoothly enlarges the cursor when moving (and scales it bigger the faster you move it), with an optional Fire-Breathing Halo of Light around the pointer and a directional Comet-Fire motion trail. Includes 5 flame color themes, Quick Settings toggles, and full customization.",
+  "name": "Speed Cursor (Dynamic Size, Fire Halo, Comet & Click Ripple)",
+  "description": "Never lose your mouse pointer again! Smoothly enlarges the cursor when moving (and scales it bigger with speed), with a Fire-Breathing Halo of Light, a Comet-Fire motion trail, and an On-Click Ripple animation for screen recordings and tutorials. Includes 5 flame color themes, button-coded click rings, Quick Settings toggles, and full customization.",
   "shell-version": [
     "49",
     "50"

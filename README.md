@@ -43,11 +43,14 @@ Traditional "shake-to-find" utilities only trigger after you violently shake the
 3. **☄️ Comet-Fire (`Directional Motion Trail`)**
    * Leaves a smooth, tapering ribbon of fire behind your moving pointer so your eyes immediately see **where the mouse was** and **which direction it moved**.
    * Built on a zero-GC pre-allocated particle pool with path interpolation and upward thermal drift.
-4. **🎨 5 Built-In Flame Color Themes**
+4. **🎯 On-Click Ripple Animation (`Screen Recording Helper`)**
+   * Spawns an expanding concentric shockwave ring anchored to the exact screen coordinate `(x, y)` where you click — ideal for screen recordings, video tutorials, and live presentations.
+   * Optional **Color-Coding by Mouse Button**: **Left Click** = Amber Gold, **Right Click** = Electric Cyan, **Middle Click** = Neon Emerald (or match your chosen Flame Color Theme).
+5. **🎨 5 Built-In Flame Color Themes**
    * Choose between **🔥 Ember Fire**, **☀️ Solar Gold**, **⚡ Blue Plasma**, **🟢 Emerald Wildfire**, and **🌹 Crimson Phoenix** to match any wallpaper or desktop theme.
-5. **🎛️ One-Click Quick Settings & Full Libadwaita Preferences**
-   * Toggle **Speed Size Scaling**, **Fire-Breathing Halo**, and **Comet-Fire Trail** independently right from the top-right GNOME Quick Settings menu, or fine-tune every slider in the native Settings window.
-6. **🎬 Fullscreen Video & Game Smart Detection**
+6. **🎛️ One-Click Quick Settings & Full Libadwaita Preferences**
+   * Toggle **Speed Size Scaling**, **Fire-Breathing Halo**, **Comet-Fire Trail**, and **Click Ripple (Screen Recording)** independently right from the top-right GNOME Quick Settings menu, or fine-tune every slider in the native Settings window.
+7. **🎬 Fullscreen Video & Game Smart Detection**
    * Automatically pauses effects whenever a video player or game hides the system pointer, and uses **0% CPU** when idle.
 
 ---
@@ -98,6 +101,10 @@ You can customize **Speed Cursor** from three places:
 | **Comet-Fire Trail** | `comet-fire-enabled` | `true` | Ignite a directional comet trail on mouse movement |
 | **Comet Trail Length** | `comet-fire-length` | `18` | Number of flame particles in the comet tail (`6–28`) |
 | **Flame Color Theme** | `fire-theme` | `'ember'` | `ember`, `solar`, `plasma`, `emerald`, or `crimson` |
+| **On-Click Ripple** | `click-effect-enabled` | `true` | Expanding click ring for screen recordings & demos |
+| **Color-Code by Button** | `click-color-by-button` | `true` | Left=Gold, Right=Cyan, Middle=Emerald |
+| **Click Ripple Diameter** | `click-effect-size` | `110` | Maximum diameter of the expanding click ring (`48px–240px`) |
+| **Click Ripple Duration** | `click-effect-duration` | `0.38` | Duration of each click shockwave animation (`0.15s–1.0s`) |
 
 ---
 
