@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.speed-cursor" path="/org/gnome/shell/extensions/speed-cursor/">
+    <key name="effect-enabled" type="b">
+      <default>true</default>
+      <summary>Enable Speed Cursor Effect</summary>
+      <description>Toggle the dynamic cursor scaling effect on or off.</description>
+    </key>
+    <key name="min-move-scale" type="d">
+      <default>1.3</default>
+      <summary>Minimum Moving Scale</summary>
+      <description>Scale multiplier as soon as the mouse starts moving slowly (1.0 = normal cursor size).</description>
+    </key>
+    <key name="max-fast-scale" type="d">
+      <default>4.0</default>
+      <summary>Maximum Fast Scale</summary>
+      <description>Maximum scale multiplier when moving the mouse fast.</description>
+    </key>
+    <key name="max-speed-threshold" type="d">
+      <default>2600.0</default>
+      <summary>Fast Speed Threshold (px/s)</summary>
+      <description>Pointer velocity (in pixels per second) at which the cursor reaches its maximum size.</description>
+    </key>
+    <key name="grow-smoothing" type="d">
+      <default>0.38</default>
+      <summary>Grow Responsiveness</summary>
+      <description>How quickly the cursor expands when speed increases (0.05 to 1.0).</description>
+    </key>
+    <key name="shrink-smoothing" type="d">
+      <default>0.14</default>
+      <summary>Shrink Smoothness</summary>
+      <description>How quickly the cursor shrinks back to normal size when slowing down or stopping (0.03 to 0.5).</description>
+    </key>
+    <key name="hide-system-cursor" type="b">
+      <default>true</default>
+      <summary>Hide System Cursor While Animated</summary>
+      <description>Hide the native hardware cursor while the scaled cursor is visible.</description>
+    </key>
+  </schema>
+</schemalist>

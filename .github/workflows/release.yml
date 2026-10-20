@@ -1,0 +1,41 @@
+name: Build & Package GNOME Extension
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install GLib schema tools & zip
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libglib2.0-bin zip
+
+      - name: Validate & compile GSettings schema
+        run: |
+          glib-compile-schemas --strict schemas/
+
+      - name: Package extension bundle (.shell-extension.zip)
+        run: |
+          zip -r speed-cursor@local.shell-extension.zip \
+            metadata.json extension.js prefs.js icons/ schemas/
+
+      - name: Upload extension package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: speed-cursor@local.shell-extension.zip
+          path: speed-cursor@local.shell-extension.zip
+
+      - name: Attach bundle to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: speed-cursor@local.shell-extension.zip
