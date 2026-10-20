@@ -56,25 +56,51 @@ if [[ "$CURRENT" != *"'$UUID'"* ]]; then
     fi
 fi
 
-if command -v gnome-extensions >/dev/null 2>&1; then
-    if ! gnome-extensions info "$UUID" >/dev/null 2>&1 && command -v python3 >/dev/null 2>&1; then
-        echo "==> Registering extension with running GNOME Shell session..."
-        python3 - <<'PYEOF' || true
-import time
+if command -v gnome-extensions >/dev/null 2>&1 && command -v python3 >/dev/null 2>&1; then
+    echo "==> Activating extension in running GNOME Shell session..."
+    python3 - <<'PYEOF' || true
+import time, shutil, os
 try:
     import gi
     gi.require_version("Gio", "2.0")
     from gi.repository import Gio, GLib
 
+    ext_dir = os.path.expanduser("~/.local/share/gnome-shell/extensions/speed-cursor@local")
+    stamp = str(int(time.time()))
+    temp_name = f"_live_{stamp}.js"
+    temp_path = os.path.join(ext_dir, temp_name)
+    shutil.copyfile(os.path.join(ext_dir, "extension.js"), temp_path)
+
     settings = Gio.Settings.new("org.gnome.shell")
+    enabled = settings.get_strv("enabled-extensions")
+    if "speed-cursor@local" in enabled:
+        settings.set_strv("enabled-extensions", [x for x in enabled if x != "speed-cursor@local"])
+        Gio.Settings.sync()
+        time.sleep(0.35)
+
     old_cmd = settings.get_strv("command-history")
     old_lg = settings.get_strv("looking-glass-history")
 
     js_cmd = (
-        'Main.extensionManager.loadExtension('
-        'Main.extensionManager.createExtensionObject("speed-cursor@local", '
-        'Gio.File.new_for_path(GLib.get_home_dir() + "/.local/share/gnome-shell/extensions/speed-cursor@local"), 2)'
-        '); Main.lookingGlass.close();'
+        f'(async () => {{ '
+        f'try {{ '
+        f'  let ext = Main.extensionManager.lookup("speed-cursor@local"); '
+        f'  if (!ext) {{ '
+        f'    const dir = Gio.File.new_for_path("{ext_dir}"); '
+        f'    ext = Main.extensionManager.createExtensionObject("speed-cursor@local", dir, 2); '
+        f'    await Main.extensionManager.loadExtension(ext); '
+        f'  }} else {{ '
+        f'    try {{ if (ext.stateObj && ext.state === 1) ext.stateObj.disable(); }} catch(e) {{}} '
+        f'    const mod = await import(ext.dir.get_child("{temp_name}").get_uri()); '
+        f'    const metaArg = Object.assign({{}}, ext.metadata, {{ dir: ext.dir, path: ext.path }}); '
+        f'    ext.stateObj = new mod.default(metaArg); '
+        f'    ext.error = ""; '
+        f'    ext.state = 2; '
+        f'    Main.extensionManager._callExtensionEnable("speed-cursor@local"); '
+        f'  }} '
+        f'}} catch (err) {{ console.error("SPEED_CURSOR_INSTALL_ERR: " + err); }} '
+        f'Main.lookingGlass.close(); '
+        f'}})();'
     )
 
     settings.set_strv("command-history", old_cmd + ["lg"])
@@ -128,16 +154,20 @@ try:
     key_press_release(0xff52)
     time.sleep(0.05)
     key_press_release(0xff0d)
-    time.sleep(0.2)
+    time.sleep(0.3)
     call_session("Stop")
 
     settings.set_strv("command-history", old_cmd)
     settings.set_strv("looking-glass-history", old_lg)
+    if "speed-cursor@local" not in settings.get_strv("enabled-extensions"):
+        settings.set_strv("enabled-extensions", settings.get_strv("enabled-extensions") + ["speed-cursor@local"])
     Gio.Settings.sync()
+    time.sleep(0.3)
+    if os.path.exists(temp_path):
+        os.remove(temp_path)
 except Exception:
     pass
 PYEOF
-    fi
     gnome-extensions enable "$UUID" 2>/dev/null || true
 fi
 
