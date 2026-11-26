@@ -37,6 +37,12 @@
       <description>Hide the native hardware cursor while the scaled cursor is visible.</description>
     </key>
 
+    <key name="cursor-lean-enabled" type="b">
+      <default>true</default>
+      <summary>Living Cursor Lean</summary>
+      <description>Let the enlarged cursor sway gently, like a pendulum, in the direction it is travelling.</description>
+    </key>
+
     <!-- Fire-Breathing (Halo of Light) -->
     <key name="fire-breathing-enabled" type="b">
       <default>true</default>
@@ -84,6 +90,12 @@
       <default>0.28</default>
       <summary>Comet Trail Duration (sec)</summary>
       <description>How long the comet tail lingers before burning out (0.10 to 0.80 seconds).</description>
+    </key>
+
+    <key name="comet-sparks-enabled" type="b">
+      <default>true</default>
+      <summary>Flying Ember Sparks</summary>
+      <description>Throw off tiny glowing embers that drift upwards from the comet trail when moving fast.</description>
     </key>
 
     <!-- Shared Flame Theme -->
