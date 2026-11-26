@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <radialGradient id="c" cx="64" cy="64" r="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff6b8" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#fff6b8" stop-opacity="0"/>
+      <stop offset="0.6" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="0.72" stop-color="#ffd23a" stop-opacity="0.75"/>
+      <stop offset="0.86" stop-color="#ffa000" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#c25e00" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ring" cx="64" cy="64" r="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0.62" stop-color="#ffd23a" stop-opacity="0"/>
+      <stop offset="0.8" stop-color="#fff6b8" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#ffa000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.6"/>
+    </filter>
+  </defs>
+  <g filter="url(#soft)">
+    <circle cx="64" cy="64" r="44" fill="url(#ring)"/>
+    <path fill="url(#c)" d="M 97.48 58.09 Q 103.55 70.35 103.25 83.36 Q 96.46 85.40 96.30 74.61 Z M 97.96 65.56 Q 108.29 79.29 110.01 93.64 Q 97.16 93.47 93.11 81.57 Z M 93.07 81.63 Q 94.42 96.90 88.58 109.18 Q 80.18 103.54 83.35 91.96 Z M 83.49 91.86 Q 75.61 102.27 64.73 107.65 Q 59.54 102.57 68.18 97.74 Z M 68.55 97.69 Q 55.91 108.61 40.87 110.90 Q 40.32 100.07 52.76 96.09 Z M 62.02 97.94 Q 46.69 104.05 31.34 101.23 Q 32.54 91.47 45.45 92.49 Z M 49.63 94.81 Q 33.48 99.29 19.82 95.76 Q 24.84 84.51 37.29 85.04 Z M 37.50 85.30 Q 21.23 82.33 10.47 72.60 Q 19.98 66.82 31.38 73.60 Z M 31.63 74.41 Q 20.02 66.69 14.34 56.41 Q 23.48 52.50 30.20 60.36 Z M 30.05 62.12 Q 26.82 49.62 29.10 38.10 Q 36.70 36.53 35.37 45.65 Z M 32.96 50.13 Q 29.68 36.07 32.39 24.58 Q 43.33 27.13 43.22 37.09 Z M 47.30 34.39 Q 55.69 18.38 70.86 10.49 Q 73.80 21.13 61.76 30.07 Z M 54.78 31.27 Q 62.43 24.14 70.76 21.03 Q 74.95 26.83 68.72 30.33 Z M 73.87 31.46 Q 86.94 30.62 98.49 35.89 Q 96.48 41.97 86.04 38.11 Z M 78.89 33.44 Q 90.50 33.64 99.70 38.01 Q 98.37 45.40 90.57 42.79 Z M 88.60 40.53 Q 103.27 42.06 113.18 48.01 Q 106.47 58.28 96.91 55.48 Z"/>
+  </g>
+</svg>

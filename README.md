@@ -36,22 +36,30 @@ Traditional "shake-to-find" utilities only trigger after you violently shake the
 
 1. **⚡ Continuous Velocity Scaling (`Speed Size Scaling`)**
    * Smoothly scales your cursor from `1.0x` (stationary) $\rightarrow$ `1.3x` (slow movement) $\rightarrow$ up to `4.0x–8.0x` (fast sweeps).
+   * Driven by a damped spring: it *pops* up with a tiny playful overshoot and settles back calmly when you stop.
+   * **Living lean:** the enlarged pointer sways gently like a pendulum in the direction it travels.
    * Uses a crisp, high-resolution vector cursor locked to the exact pointer hotspot so the tip never shifts or blurs.
 2. **🔥 Fire-Breathing (`Halo of Light`)**
-   * Surrounds the cursor tip with a dual-harmonic breathing aura of light so you can spot a parked or moving pointer immediately.
-   * Automatically **stokes brighter and wider** when you move the mouse faster, and gently breathes like a warm ember when stationary.
+   * Surrounds the cursor tip with a soft glow and two counter-rotating **coronas of curling flame tongues** that breathe with organic, never-repeating rhythms.
+   * Automatically **stokes brighter, wider and spins faster** when you move the mouse quickly, and trails slightly behind fast motion like a real flame.
+   * When the pointer is parked it keeps breathing through GPU-side Clutter transitions — **no JavaScript runs at all while idle**.
 3. **☄️ Comet-Fire (`Directional Motion Trail`)**
-   * Leaves a smooth, tapering ribbon of fire behind your moving pointer so your eyes immediately see **where the mouse was** and **which direction it moved**.
-   * Built on a zero-GC pre-allocated particle pool with path interpolation and upward thermal drift.
+   * Leaves a continuous ribbon of directional **flame tongues** that stretch with speed, rise with heat and burn out from white-hot to deep color.
+   * **Flying ember sparks** break off on fast sweeps, drift upwards and twinkle out.
+   * Built on pre-allocated particle pools with path interpolation, so density is identical at 60, 120 or 144 Hz.
 4. **🎯 On-Click Ripple Animation (`Screen Recording Helper`)**
-   * Spawns an expanding concentric shockwave ring anchored to the exact screen coordinate `(x, y)` where you click — ideal for screen recordings, video tutorials, and live presentations.
+   * A bright flash, an expanding shockwave ring, a softer echo ring and a burst of embers at the exact screen coordinate `(x, y)` where you click — ideal for screen recordings, video tutorials, and live presentations.
    * Optional **Color-Coding by Mouse Button**: **Left Click** = Amber Gold, **Right Click** = Electric Cyan, **Middle Click** = Neon Emerald (or match your chosen Flame Color Theme).
 5. **🎨 5 Built-In Flame Color Themes**
    * Choose between **🔥 Ember Fire**, **☀️ Solar Gold**, **⚡ Blue Plasma**, **🟢 Emerald Wildfire**, and **🌹 Crimson Phoenix** to match any wallpaper or desktop theme.
 6. **🎛️ One-Click Quick Settings & Full Libadwaita Preferences**
    * Toggle **Speed Size Scaling**, **Fire-Breathing Halo**, **Comet-Fire Trail**, and **Click Ripple (Screen Recording)** independently right from the top-right GNOME Quick Settings menu, or fine-tune every slider in the native Settings window.
 7. **🎬 Fullscreen Video & Game Smart Detection**
-   * Automatically pauses effects whenever a video player or game hides the system pointer, and uses **0% CPU** when idle.
+   * Automatically drops all effects the moment a video player or game hides the system pointer.
+8. **🚀 Built for Performance**
+   * Animation is driven by the compositor's **frame clock** (vsync-locked at your monitor's refresh rate) instead of a fixed 16 ms timer.
+   * **Event-driven wake-up** from Mutter's cursor tracker — nothing polls the pointer, and the loop stops completely when nothing is animating.
+   * Sprites move with GPU transforms (no relayouts), are rasterised once, and live in a single effects layer.
 
 ---
 
@@ -100,11 +108,23 @@ You can customize **Speed Cursor** from three places:
 | **Halo Diameter** | `fire-breathing-size` | `88` | Diameter of the breathing light aura (`40px–220px`) |
 | **Comet-Fire Trail** | `comet-fire-enabled` | `true` | Ignite a directional comet trail on mouse movement |
 | **Comet Trail Length** | `comet-fire-length` | `18` | Number of flame particles in the comet tail (`6–28`) |
+| **Flying Ember Sparks** | `comet-sparks-enabled` | `true` | Embers break off the trail on fast movements |
+| **Living Cursor Lean** | `cursor-lean-enabled` | `true` | Enlarged cursor sways in the direction of travel |
 | **Flame Color Theme** | `fire-theme` | `'ember'` | `ember`, `solar`, `plasma`, `emerald`, or `crimson` |
 | **On-Click Ripple** | `click-effect-enabled` | `true` | Expanding click ring for screen recordings & demos |
 | **Color-Code by Button** | `click-color-by-button` | `true` | Left=Gold, Right=Cyan, Middle=Emerald |
 | **Click Ripple Diameter** | `click-effect-size` | `110` | Maximum diameter of the expanding click ring (`48px–240px`) |
 | **Click Ripple Duration** | `click-effect-duration` | `0.38` | Duration of each click shockwave animation (`0.15s–1.0s`) |
+
+---
+
+## 🛠️ Development
+
+The themed flame, spark and corona sprites are generated:
+
+```bash
+python3 tools/gen-icons.py
+```
 
 ---
 

@@ -132,6 +132,18 @@ export default class SpeedCursorPreferences extends ExtensionPreferences {
         );
         behaviorGroup.add(hideRow);
 
+        const leanRow = new Adw.SwitchRow({
+            title: 'Living Cursor Lean',
+            subtitle: 'The enlarged cursor sways gently in the direction it travels and springs back when it stops',
+        });
+        settings.bind(
+            'cursor-lean-enabled',
+            leanRow,
+            'active',
+            Gio.SettingsBindFlags.DEFAULT
+        );
+        behaviorGroup.add(leanRow);
+
         // =====================================================================
         // PAGE 2: Fire-Breathing Halo & Comet-Fire Trail
         // =====================================================================
@@ -257,6 +269,18 @@ export default class SpeedCursorPreferences extends ExtensionPreferences {
         );
         cometGroup.add(cometEnableRow);
 
+        const sparksRow = new Adw.SwitchRow({
+            title: 'Flying Ember Sparks',
+            subtitle: 'Tiny glowing embers break off the trail and drift upwards on fast movements',
+        });
+        settings.bind(
+            'comet-sparks-enabled',
+            sparksRow,
+            'active',
+            Gio.SettingsBindFlags.DEFAULT
+        );
+        cometGroup.add(sparksRow);
+
         cometGroup.add(
             this._createIntScaleRow(
                 settings,
@@ -286,6 +310,7 @@ export default class SpeedCursorPreferences extends ExtensionPreferences {
             this._createScaleRow(
                 settings,
                 'comet-fire-duration',
+                'comet-sparks-enabled',
                 'Trail Burnout Duration (sec)',
                 'How long the comet trail lingers before fading out',
                 0.10,
@@ -397,6 +422,7 @@ export default class SpeedCursorPreferences extends ExtensionPreferences {
                 'grow-smoothing',
                 'shrink-smoothing',
                 'hide-system-cursor',
+                'cursor-lean-enabled',
                 'fire-breathing-enabled',
                 'fire-breathing-always',
                 'fire-breathing-size',
