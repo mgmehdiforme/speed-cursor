@@ -24,9 +24,11 @@
 ## 📸 Preview in Action
 
 <div align="center">
-  <img src="assets/screenshot.png" alt="Speed Cursor with Fire-Breathing Halo and Comet-Fire Trail on Ubuntu GNOME" width="90%" />
-  <p><em>Enlarged velocity-scaled pointer with the <strong>Fire-Breathing Halo</strong> at the tip and a curved <strong>Comet-Fire Motion Trail</strong> showing the exact path traveled.</em></p>
+  <img src="assets/demo.gif" alt="Speed Cursor v3: the pointer grows with speed, leaves a ribbon of fire with ember sparks, breathes a flame corona when parked and shows click ripples" width="90%" />
+  <p><em>v3, recorded on GNOME Shell 50: speed scaling, the flame-corona halo, the comet-fire trail with ember sparks, and click ripples.</em></p>
 </div>
+
+<!-- VIDEO -->🎬 **Video walkthrough:** coming soon
 
 ---
 
@@ -118,6 +120,27 @@ You can customize **Speed Cursor** from three places:
 
 ---
 
+## 🤖 Built with Claude Code, and made to prove it
+
+v3 was a full review and rewrite done with [Claude Code](https://claude.com/claude-code). The interesting part was checking its claims, not writing the code.
+
+- **Isolated test runs:** every test started its own headless GNOME Shell 50 (`gnome-shell --headless --virtual-monitor`) in a separate D-Bus session, so the real desktop was never touched.
+- **A virtual mouse:** a small driver extension moved and clicked a Clutter virtual pointer with the same script for v2 and v3, counted and timed every frame, read the shell's CPU time and took screenshots.
+- **Honest numbers:** the first rewrite looked much better but used about 10% *more* CPU while moving. A per-function profile showed the new ember sparks were the cost, not the engine. After the fix, moving is back to v2's level, within run-to-run noise.
+- **A bug caught before release:** right after waking, the halo could decide it was invisible and put the loop to sleep before it appeared.
+
+| Same script, same settings (headless GNOME Shell 50.1) | v2 | v3 |
+| :--- | :---: | :---: |
+| Parked 5 s: per-frame JavaScript calls | 268–305 | **0** |
+| Parked 5 s: shell CPU time | 310–330 ms | **260–270 ms** |
+| 8 fast sweeps: shell CPU time | 840–870 ms | 800–850 ms |
+
+<div align="center">
+  <img src="assets/before-after.png" alt="Side by side: v2 shows a beaded trail, v3 a continuous ribbon of fire with sparks and a flame corona" width="90%" />
+</div>
+
+---
+
 ## 🛠️ Development
 
 The themed flame, spark and corona sprites are generated:
@@ -139,3 +162,5 @@ python3 tools/gen-icons.py
 ## 📄 License
 
 Released under the [MIT License](LICENSE). Created by [Mehdi Golzari](https://github.com/mgmehdiforme).
+
+Built by Mehdi Golzari. I take AI-built apps from prototype to production, and I set up Claude Code for dev teams: [Claude Code team setup on Fiverr](https://www.fiverr.com/mehdigolzari/set-up-claude-code-with-custom-skills-and-mcp-servers-for-your-dev-team).
