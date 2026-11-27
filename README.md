@@ -44,7 +44,7 @@ Traditional "shake-to-find" utilities only trigger after you violently shake the
 2. **🔥 Fire-Breathing (`Halo of Light`)**
    * Surrounds the cursor tip with a soft glow and two counter-rotating **coronas of curling flame tongues** that breathe with organic, never-repeating rhythms.
    * Automatically **stokes brighter, wider and spins faster** when you move the mouse quickly, and trails slightly behind fast motion like a real flame.
-   * When the pointer is parked it keeps breathing through GPU-side Clutter transitions — **no JavaScript runs at all while idle**.
+   * When the pointer is parked it keeps breathing through GPU-side Clutter transitions — **no per-frame JavaScript runs while idle**.
 3. **☄️ Comet-Fire (`Directional Motion Trail`)**
    * Leaves a continuous ribbon of directional **flame tongues** that stretch with speed, rise with heat and burn out from white-hot to deep color.
    * **Flying ember sparks** break off on fast sweeps, drift upwards and twinkle out.
